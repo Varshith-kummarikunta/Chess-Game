@@ -6,7 +6,7 @@ export const ProtectedRoutes = () => {
   const isAuthChecked = useSelector((state) => state.auth.isAuthChecked)
 
   if (!isAuthChecked) {
-    return <div>...Loading</div>;
+    return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
 
   if (!user) {

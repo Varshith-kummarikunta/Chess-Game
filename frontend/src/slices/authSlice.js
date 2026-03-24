@@ -5,17 +5,17 @@ const initialState = {
   user: null,
   status: "idle", // 'idle' | 'succes' | 'pending' | 'error'
   error: null,
+  isAuthChecked: false
 };
 
 export const login = createAsyncThunk(
   "auth/login",
-  async ({ email, password }) => {
+  async ({ email, password }, thunkAPI) => {
     try {
       const res = await api.post("/auth/login", { email, password });
       return res.data;
     } catch (err) {
-      // return thunkAPI.rejectWithValue(err.message || "Login failed");
-      return err.message || "Login failed";
+      return thunkAPI.rejectWithValue(err.message || "Login failed");
     }
   },
 );
@@ -66,7 +66,6 @@ const authSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     function pending(state) {
-      state.user = null;
       state.status = "pending";
       state.error = null;
     }
@@ -78,6 +77,7 @@ const authSlice = createSlice({
       state.error = action.payload;
       state.status = "error";
       state.user = null;
+      state.isAuthChecked = true;
     }
     builder
       .addCase(login.pending, pending)
@@ -95,9 +95,10 @@ const authSlice = createSlice({
       .addCase(logout.rejected, rejected)
       .addCase(fetchMe.pending, pending)
       .addCase(fetchMe.fulfilled, (state, action) => {
-        state.user = action.payload;
-        state.status = "sucess";
+        state.user = action.payload?.user || action.payload;
+        state.status = "success";
         state.error = null;
+        state.isAuthChecked = true;
       })
       .addCase(fetchMe.rejected, rejected);
   },

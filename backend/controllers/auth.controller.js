@@ -76,7 +76,7 @@ const signup = async (req, res) => {
 const fetchMe = (req, res) => {
   try {
     const user = req.user;
-    return res.status(200).json({ user });
+    return res.status(200).json( user );
   } catch (err) {
     return res.status(500).json({ err: err.message });
   }
@@ -135,4 +135,4 @@ const refresh = async (req, res) => {
   }
 };
 
-module.exports = { login, signup, fetchMe, logout, refresh};
+module.exports = { login, signup, fetchMe, logout, refresh };

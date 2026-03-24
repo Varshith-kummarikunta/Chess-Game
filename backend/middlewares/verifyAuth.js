@@ -6,7 +6,7 @@ const verifyAuth = async (req, res, next) => {
     if (!accessToken) {
       return res.status(401).json({ message: "Acess token missing" });
     }
-    const payload = jwt.verify(accessToken, process.env.JWT_ACESSS_SECRET);
+    const payload = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
     const id = payload.sub;
 
     const user = await User.findById(id).select("-passwordHash");
