@@ -11,6 +11,13 @@ export const Room = () => {
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const [fen, setFen] = useState(null);
+  const [turn, setTurn] = useState(null);
+  const isMyTurn =
+    (turn === "w" && color === "white") || (turn === "b" && color === "black");
+
+  console.log("turn:", turn);
+  console.log("color:", color);
+  console.log("isMyTurn:", isMyTurn);
 
   useEffect(() => {
     connectSocket();
@@ -20,35 +27,37 @@ export const Room = () => {
         return alert(response?.message || "Failed to join room");
       setRoom(response.room);
       setColor(
-        user._id.toString() === room?.whileId?.toString() ? "White" : "Black",
-      )
+        user._id.toString() === response.room.whiteId?.toString()
+          ? "white"
+          : "black",
+      );
     });
 
     socket.emit("game:state", roomCode, (response) => {
-      if (!response?.ok) return alert(response?.message || "Failed  to fetch game");
+      if (!response?.ok)
+        return alert(response?.message || "Failed  to fetch game");
       setFen(response?.state?.fen);
-      setTurn(response?.state?.turn)
+      setTurn(response?.state?.turn);
     });
 
     const onPresence = (data) => {
-      console.log("room:presence", data)
+      console.log("room:presence", data);
       setRoom(data);
     };
 
     socket.on("room:presence", onPresence);
     const onUpdate = (state) => {
       setFen(state.fen);
-      setTurn(state.turn)
-      
-    }
+      setTurn(state.turn);
+    };
 
-    socket.on("game:update", onUpdate)
+    socket.on("game:update", onUpdate);
 
     return () => {
       socket.off("room:presence", onPresence);
-      socket.off("game:update", onUpdate)
+      socket.off("game:update", onUpdate);
     };
-  }, [roomCode]);
+  }, [roomCode, user]);
 
   function leaveRoom() {
     connectSocket();
@@ -62,12 +71,29 @@ export const Room = () => {
   }
 
   function onDrop(sourceSquare, targetSquare) {
-    connectSocket();
-    if (!fen) return false;
-    socket.emit("game:move", roomCode, sourceSquare, targetSquare, "q", (response) => {
-      if(!response?.ok) return alert(response?.message || "invalid message")
-    });
+  if (!fen) return false;
+
+  socket.emit(
+    "game:move",
+    roomCode,
+    sourceSquare,
+    targetSquare,
+    "q",
+    (response) => {
+      if (!response?.ok) {
+        alert(response?.message || "Invalid move");
+      }
+    }
+  );
+
   return true;
+}
+
+  function startGame() {
+    connectSocket();
+    socket.emit("game:start", roomCode, (res) => {
+      if (!res?.ok) alert(res.message);
+    });
   }
 
   return (
@@ -83,16 +109,20 @@ export const Room = () => {
       </ul>
       <div className="flex gap-2">
         {room?.status === "ready" && (
-          <button className="bg-green-400 p-2 rounded">Start Game</button>
+          <button onClick={startGame} className="bg-green-400 p-2 rounded">
+            Start Game
+          </button>
         )}
         <button onClick={leaveRoom} className="bg-red-400 p-2 rounded">
           Leave
         </button>
       </div>
-      {room?.status === "ready" && (
+      {room?.status !== "waiting" && (
         <div className="w-[480px]">
-          <div></div>
-          <Chessboard fen={fen} onPieceDrop={onDrop} />
+          <p>{turn === "w" ? "White's Turn" : "Black's Turn"}</p>
+          <div>
+            <Chessboard position={fen || "start"} onPieceDrop={onDrop} />
+          </div>
         </div>
       )}
     </div>

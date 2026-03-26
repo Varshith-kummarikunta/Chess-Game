@@ -8,6 +8,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 const { User } = require("./models/user.model");
+const { Game } = require("./models/game.model");
 const { Chess } = require("chess.js");
 
 const app = express();
@@ -96,6 +97,45 @@ function getRoomCode(len = 6) {
 }
 
 const rooms = new Map();
+
+async function saveGameDetailsToUser(room, result, reason) {
+  const whiteId = room.whiteId;
+  const blackId = room.blackId;
+  const white = await User.findById(whiteId);
+  const black = await User.findById(blackId);
+  if (result === "draw") {
+    white.stats.draws += 1;
+    white.stats.gamesPlayed += 1;
+    white.stats.currentStreak = 0;
+    black.stats.draws += 1;
+    black.stats.gamesPlayed += 1;
+    black.stats.currentStreak = 0;
+  } else if (result === "white") {
+    white.stats.wins += 1;
+    white.stats.gamesPlayed += 1;
+    white.stats.currentStreak += 1;
+    white.stats.bestStreak = Math.max(
+      white.stats.bestStreak,
+      white.stats.currentStreak,
+    );
+    black.stats.losses += 1;
+    black.stats.gamesPlayed += 1;
+    black.stats.currentStreak = 0;
+  } else if (result === "black") {
+    black.stats.wins += 1;
+    black.stats.gamesPlayed += 1;
+    black.stats.currentStreak += 1;
+    black.stats.bestStreak = Math.max(
+      black.stats.bestStreak,
+      black.stats.currentStreak,
+    );
+    white.stats.losses += 1;
+    white.stats.gamesPlayed += 1;
+    white.stats.currentStreak = 0;
+  }
+  await white.save();
+  await black.save();
+}
 
 io.on("connection", (socket) => {
   console.log(`a user connected on socket ${socket.id}`);
@@ -193,7 +233,7 @@ io.on("connection", (socket) => {
       room.status = room.players.length === 2 ? "ready" : "waiting";
       // If room is empty rooms.delete(roomCode)
       socket.leave(roomCode);
-      io.to(roomCode).emit("room:presence", get(room));
+      io.to(roomCode).emit("room:presence", getPublicRoom(room));
       if (room.players.length === 0) {
         rooms.delete(roomCode);
         return ack?.({ ok: true });
@@ -204,10 +244,15 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("game:move", (roomCode, from, to, promotion, ack) => {
+  socket.on("game:move", async (roomCode, from, to, promotion, ack) => {
     try {
       const room = rooms.get(roomCode);
+
       if (!room) return ack?.({ ok: false, message: "Room does not exist" });
+
+      if (!room.whiteId || !room.blackId) {
+        return ack?.({ ok: false, message: "wait for other player to join " });
+      }
       let player = "none";
       if (socket.user._id.toString() === room.whiteId.toString()) {
         player = "w";
@@ -230,17 +275,32 @@ io.on("connection", (socket) => {
         return ack?.({ ok: false, message: "Invalid move" });
       }
       room.lastMove = { from, to };
-      ack?.({ok:true});
+      ack?.({ ok: true });
       io.to(roomCode).emit("game:update", getPublicState(room));
 
       if (room.game.isGameOver()) {
-        let result = "gameover";
+        let reason = "other";
+        let result = "draw";
         if (room.game.isCheckmate()) {
           result = turn === "w" ? "white" : "black";
         }
         if (room.game.isDraw()) {
           result = "draw";
+          result = "draw";
         }
+        const game = new Game({
+          roomCode,
+
+          whiteId: room.whiteId,
+          blackId: room.blackId,
+          reason,
+          result,
+          startedAt: new Date(room.createdAt),
+          endedAt: Date.now(),
+          duration: Date.now() - room.createdAt,
+        });
+        await game.save();
+        await saveGameDetailsToUser(room, result, reason);
         io.to(roomCode).emit("game:over", result);
       }
     } catch (err) {
@@ -250,6 +310,18 @@ io.on("connection", (socket) => {
       });
     }
   });
+
+  socket.on("game:state", (roomCode, ack) => {
+  const room = rooms.get(roomCode);
+  if (!room) {
+    return ack?.({ ok: false, message: "Room not found" });
+  }
+
+  ack?.({
+    ok: true,
+    state: getPublicState(room),
+  });
+});
 });
 
 server.listen(PORT, () => console.log("Server is listening on port", PORT));
