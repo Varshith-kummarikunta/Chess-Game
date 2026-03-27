@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 const { User } = require("./models/user.model");
 const { Game } = require("./models/game.model");
 const { Chess } = require("chess.js");
+const { leaderboardRouter } = require("./routes/leaderboard.routes");
 
 const app = express();
 app.use(express.json());
@@ -22,6 +23,7 @@ app.use(
 );
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/leaderboard" , leaderboardRouter)
 
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;

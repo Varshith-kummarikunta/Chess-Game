@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { Link, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { logout } from "../slices/authSlice";
 
 export const Navbar = () => {
@@ -18,7 +18,10 @@ export const Navbar = () => {
         </div>
         <div>
           {user ? (
+            <div className="flex gap-4">
+              <NavLink to="/leaderboard">Leaderboard</NavLink>
             <button onClick={handleLogout}>Logout</button>
+            </div>
           ) : (
             <div className="flex flex-row gap-4">
               <Link to="/login">Login</Link>
