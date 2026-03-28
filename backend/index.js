@@ -37,6 +37,17 @@ const io = new Server(server, {
   },
 });
 
+// upload image
+
+const uploadsRoute = require("./routes/uploads")
+
+app.use("/api/v1/uploads", uploadsRoute)
+
+app.use("/uploads",express.static("uploads"));
+
+//
+
+
 io.use(async (socket, next) => {
   try {
     const cookieHeader = socket.handshake.headers.cookie || "";

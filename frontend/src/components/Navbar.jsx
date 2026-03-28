@@ -19,6 +19,7 @@ export const Navbar = () => {
         <div>
           {user ? (
             <div className="flex gap-4">
+              <NavLink to="/profile">Profile</NavLink>
               <NavLink to="/leaderboard">Leaderboard</NavLink>
             <button onClick={handleLogout}>Logout</button>
             </div>
