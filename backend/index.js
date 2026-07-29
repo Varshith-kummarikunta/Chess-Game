@@ -16,41 +16,48 @@ require("dotenv").config();
 
 const app = express();
 app.use(express.json());
-app.use(cors({
-  origin: [process.env.CLIENT_URL || "http://localhost:5173"],
-  credentials: true,
-  methods: ['POST', 'GET', 'DELETE', 'PUT', 'PATCH', 'OPTIONS']
-}));
+app.use(
+  cors({
+    origin: [process.env.CLIENT_URL || "http://localhost:5173"],
+    credentials: true,
+    methods: ["POST", "GET", "DELETE", "PUT", "PATCH", "OPTIONS"],
+  }),
+);
 app.use(cookieParser());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/leaderboard", leaderboardRouter);
-app.post("/api/v1/upload", verifyAuth, parser.single("file"), async (req, res) => {
-  try {
-    console.log(req.file.originalname);
-    console.log(req.file.size);
-    const url = req.file.path;
-    const userId = req.user._id;
-    
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+app.post(
+  "/api/v1/upload",
+  verifyAuth,
+  parser.single("file"),
+  async (req, res) => {
+    try {
+      console.log(req.file.originalname);
+      console.log(req.file.size);
+      const url = req.file.path;
+      const userId = req.user._id;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      user.avatar = url;
+      await user.save();
+
+      const userWithoutPassword = user.toObject();
+      delete userWithoutPassword.passwordHash;
+
+      return res.status(200).json({ user: userWithoutPassword });
+    } catch (err) {
+      console.error("Upload Error:", err);
+      console.error("Message:", err.message);
+      console.error("Stack:", err.stack);
+      return res.status(500).json({ message: err.message });
     }
-    
-    user.avatar = url;
-    await user.save();
-    
-    const userWithoutPassword = user.toObject();
-    delete userWithoutPassword.passwordHash;
-    
-    return res.status(200).json({ user: userWithoutPassword });
-  } catch (err) {
-  console.error("Upload Error:", err);
-console.error("Message:", err.message);
-console.error("Stack:", err.stack);
-  return res.status(500).json({ message: err.message });
-}
-});
+  },
+);
 
 const PORT = process.env.PORT || 4000;
 
@@ -60,9 +67,9 @@ const io = new Server(server, {
   cors: {
     origin: [process.env.CLIENT_URL || "http://localhost:5173"],
     credentials: true,
-    transports: ['polling'],
-    methods: ['POST', 'GET', 'DELETE', 'PUT', 'PATCH', 'OPTIONS']
-  }
+    transports: ["polling"],
+    methods: ["POST", "GET", "DELETE", "PUT", "PATCH", "OPTIONS"],
+  },
 });
 
 io.use(async (socket, next) => {
@@ -85,7 +92,6 @@ io.use(async (socket, next) => {
     let { guestId, guestName } = socket.handshake.auth;
 
     if (accessToken) {
-
       const payload = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
 
       const user = await User.findById(payload.sub).select("-passwordHash");
@@ -101,15 +107,15 @@ io.use(async (socket, next) => {
       socket.user = {
         _id: guestId,
         name: guestName,
-        role: "guest"
-      }
+        role: "guest",
+      };
 
       return next();
     }
   } catch (err) {
     return next(new Error("Unauthorized"));
   }
-})
+});
 
 function getPublicRoom(room) {
   return {
@@ -138,13 +144,18 @@ function getPublicState(room) {
 function getPubliClock(room) {
   return {
     ...room.clock,
-    roomCode: room.roomCode
+    roomCode: room.roomCode,
   };
 }
 
 function getGameOverPayload(room, result, reason) {
   const winnerColor = result === "white" || result === "black" ? result : null;
-  const winnerId = winnerColor === "white" ? room.whiteId : winnerColor === "black" ? room.blackId : null;
+  const winnerId =
+    winnerColor === "white"
+      ? room.whiteId
+      : winnerColor === "black"
+        ? room.blackId
+        : null;
   const winner = winnerId
     ? room.players.find((p) => p.userId.toString() === winnerId.toString())
     : null;
@@ -163,7 +174,7 @@ function getRoomCode(len = 6) {
   let code = "";
 
   for (let i = 0; i < len; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)]
+    code += chars[Math.floor(Math.random() * chars.length)];
   }
 
   return code;
@@ -261,7 +272,7 @@ io.on("connection", (socket) => {
         name: socket.user.name,
         socketId: socket.id,
         userId: socket.user._id,
-        role: socket.user.role
+        role: socket.user.role,
       });
       const baseMs = 5 * 60 * 1000;
       const incrementMs = 0;
@@ -271,8 +282,8 @@ io.on("connection", (socket) => {
         blackMs: baseMs,
         active: "w",
         lastSwtichAt: null,
-        running: false
-      }
+        running: false,
+      };
       rooms.set(roomCode, newRoom);
       io.to(roomCode).emit("room:presence", getPublicRoom(newRoom));
       return ack?.({ ok: true, room: getPublicRoom(newRoom) });
@@ -321,10 +332,12 @@ io.on("connection", (socket) => {
       io.to(roomCode).emit("room:presence", getPublicRoom(existingRoom));
       return ack?.({ ok: true, room: getPublicRoom(existingRoom) });
     } catch (err) {
-      return ack?.(console.log({
-        ok: false,
-        message: err.message || "Failed to join the room",
-      }));
+      return ack?.(
+        console.log({
+          ok: false,
+          message: err.message || "Failed to join the room",
+        }),
+      );
     }
   });
 
@@ -362,7 +375,11 @@ io.on("connection", (socket) => {
   socket.on("game:state", (roomCode, ack) => {
     const room = rooms.get(roomCode);
     if (!room) return ack?.({ ok: false, message: "Room does not exist" });
-    return ack?.({ ok: true, state: getPublicState(room), clock: getPubliClock(room) });
+    return ack?.({
+      ok: true,
+      state: getPublicState(room),
+      clock: getPubliClock(room),
+    });
   });
 
   socket.on("chat:history", (roomCode, ack) => {
@@ -372,7 +389,10 @@ io.on("connection", (socket) => {
 
       return ack?.({ ok: true, messages: room.messages || [] });
     } catch (err) {
-      return ack?.({ ok: false, message: err.message || "Failed to fetch chat" });
+      return ack?.({
+        ok: false,
+        message: err.message || "Failed to fetch chat",
+      });
     }
   });
 
@@ -407,7 +427,10 @@ io.on("connection", (socket) => {
 
       return ack?.({ ok: true, message });
     } catch (err) {
-      return ack?.({ ok: false, message: err.message || "Failed to send message" });
+      return ack?.({
+        ok: false,
+        message: err.message || "Failed to send message",
+      });
     }
   });
 
@@ -461,7 +484,10 @@ io.on("connection", (socket) => {
         room.clock.running = false;
         const result = room.clock.whiteMs === 0 ? "black" : "white";
         const reason = "timeout";
-        io.to(roomCode).emit("game:over", getGameOverPayload(room, result, reason));
+        io.to(roomCode).emit(
+          "game:over",
+          getGameOverPayload(room, result, reason),
+        );
 
         const guest = room.players.some((p) => p.role === "guest");
         if (guest) {
@@ -494,7 +520,10 @@ io.on("connection", (socket) => {
           result = "draw";
           reason = "draw";
         }
-        io.to(roomCode).emit("game:over", getGameOverPayload(room, result, reason));
+        io.to(roomCode).emit(
+          "game:over",
+          getGameOverPayload(room, result, reason),
+        );
 
         if (socket.user.role === "guest") {
           return;
@@ -522,9 +551,12 @@ io.on("connection", (socket) => {
   });
 });
 
-mongoose.connect(process.env.MONGODB_URL)
+mongoose
+  .connect(process.env.MONGODB_URL)
   .then(() => {
     console.log("DB Connected");
-    server.listen(process.env.PORT, () => console.log("Server running at", process.env.PORT));
+    server.listen(PORT, () => {
+      console.log("Server running at", PORT);
+    });
   })
-  .catch((err) => console.log("Failed to connect DB", err))
+  .catch((err) => console.log("Failed to connect DB", err));
