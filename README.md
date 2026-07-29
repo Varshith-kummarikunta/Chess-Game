@@ -1,27 +1,106 @@
 # ♟️ Chess Game – Real-Time Multiplayer Chess Platform
 
-A full-stack real-time multiplayer chess application where users can register, log in, upload profile pictures, create or join game rooms, and play chess online with live move synchronization.
+A production-ready full-stack real-time multiplayer chess application where users can register, authenticate, upload profile pictures, create or join game rooms, and compete in live chess matches with synchronized gameplay.
 
-## 🌐 Live Demo
-
-**Frontend:** https://play-chess-online.vercel.app
-
-**Backend:** https://chess-game-backend-vzal.onrender.com
+Built using the **MERN stack** with **Socket.IO real-time communication**, **MongoDB Atlas**, **Cloudinary image storage**, and deployed using **Vercel and Render**.
 
 ---
 
-# 📸 Features
+# 📸 Screenshots
 
-* 🔐 Secure user authentication (JWT)
-* 👤 User registration and login
-* 🖼️ Profile picture upload with Cloudinary
-* ♟️ Real-time multiplayer chess gameplay
-* 🚪 Create and join game rooms
-* ⚡ Live move synchronization using Socket.IO
-* ✅ Chess move validation using chess.js
-* 🏆 Leaderboard system
-* 📱 Responsive user interface
-* ☁️ Cloud deployment
+## 🔐 Login Page
+
+![Login Page](./screenshots/login.png)
+
+---
+
+## 🏠 Dashboard
+
+![Dashboard](./screenshots/dashboard.png)
+
+---
+
+## ♟️ Live Chess Game
+
+![Chess Board](./screenshots/chess-board.png)
+
+---
+
+## 🏆 Leaderboard
+
+![Leaderboard](./screenshots/leaderboard.png)
+
+---
+
+## 🎥 Demo
+
+![Chess Game Demo](./screenshots/demo.gif)
+
+---
+
+# 🌐 Live Demo
+
+Frontend:  
+[https://play-chess-online.vercel.app](https://play-chess-online.vercel.app)
+
+Backend API:  
+[https://chess-game-backend-vzal.onrender.com](https://chess-game-backend-vzal.onrender.com)
+
+---
+
+# 🚀 Key Highlights
+
+- ♟️ Real-time multiplayer chess gameplay using **Socket.IO**
+- 🔐 Secure authentication using **JWT and bcrypt**
+- 🖼️ Profile image uploads using **Cloudinary**
+- 🗄️ MongoDB Atlas database integration
+- ⚡ Live chess move synchronization between players
+- ✅ Chess move validation using **chess.js**
+- 📱 Responsive React frontend
+- 🏆 Leaderboard and player statistics
+- ☁️ Production deployment using **Vercel + Render**
+- 🔄 GitHub-based continuous deployment workflow
+
+---
+
+# ✨ Features
+
+## Authentication
+
+- User registration
+- User login
+- JWT authentication
+- Password hashing using bcrypt
+- Secure cookie-based sessions
+- Protected routes
+
+---
+
+## Profile Management
+
+- Upload profile pictures
+- Store images using Cloudinary
+- Save image URLs in MongoDB
+
+---
+
+## Multiplayer Chess
+
+- Create chess rooms
+- Join existing rooms
+- Two-player online gameplay
+- Real-time board updates
+- Live move synchronization
+- Chess rule validation using chess.js
+- Player disconnect handling
+
+---
+
+## Leaderboard
+
+- Track player statistics
+- Store rankings
+- Display leaderboard information
 
 ---
 
@@ -29,194 +108,134 @@ A full-stack real-time multiplayer chess application where users can register, l
 
 ## Frontend
 
-* React.js
-* Vite
-* Axios
-* React Router
-* Socket.IO Client
-* CSS
+- React.js
+- Vite
+- React Router
+- Axios
+- Socket.IO Client
+- CSS
 
 ## Backend
 
-* Node.js
-* Express.js
-* Socket.IO
-* JWT Authentication
-* bcrypt
-* Multer
-* Cloudinary
-* Cookie Parser
-* CORS
-* dotenv
+- Node.js
+- Express.js
+- Socket.IO
+- JWT Authentication
+- bcrypt
+- Multer
+- Cloudinary
+- Cookie Parser
+- CORS
+- dotenv
 
 ## Database
 
-* MongoDB Atlas
-* Mongoose
+- MongoDB Atlas
+- Mongoose ODM
+
+## Deployment
+
+- Vercel
+- Render
+- GitHub
+
+---
+
+# 🏗️ System Architecture
+
+```
+                React Frontend
+                      |
+          Axios + Socket.IO Client
+                      |
+              Express Backend
+                      |
+              Socket.IO Server
+                      |
+        ----------------------------
+        |                          |
+ MongoDB Atlas               Cloudinary
+(User Data)              (Profile Images)
+```
 
 ---
 
 # 📂 Project Structure
 
-```text
-Chess-Game/
+```
+Chess-Game
 │
-├── frontend/
-│   ├── src/
-│   ├── public/
+├── frontend
+│   ├── src
+│   ├── public
 │   ├── package.json
 │   └── vite.config.js
 │
-├── backend/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── socket/
-│   ├── utils/
+├── backend
+│   ├── controllers
+│   ├── middleware
+│   ├── models
+│   ├── routes
+│   ├── socket
+│   ├── utils
 │   ├── package.json
 │   └── index.js
 │
-├── .gitignore
 └── README.md
 ```
 
 ---
 
-# ⚙️ Installation
-
-## Clone the repository
-
-```bash
-git clone https://github.com/Varshith-kummarikunta/Chess-Game.git
-```
-
-```bash
-cd Chess-Game
-```
-
----
-
-## Backend Setup
-
-```bash
-cd backend
-```
-
-Install dependencies
-
-```bash
-npm install
-```
-
-Create a `.env` file inside the `backend` folder.
-
-```env
-MONGODB_URL=your_mongodb_connection_string
-
-JWT_ACCESS_SECRET=your_access_secret
-
-JWT_REFRESH_SECRET=your_refresh_secret
-
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-
-CLOUDINARY_API_KEY=your_api_key
-
-CLOUDINARY_SECRET_KEY=your_secret_key
-
-CLIENT_URL=http://localhost:5173
-
-PORT=4000
-```
-
-Start the backend server
-
-```bash
-npm run dev
-```
-
----
-
-## Frontend Setup
-
-```bash
-cd frontend
-```
-
-Install dependencies
-
-```bash
-npm install
-```
-
-Create a `.env` file.
-
-```env
-VITE_API_URL=http://localhost:4000
-```
-
-Start the frontend
-
-```bash
-npm run dev
-```
-
----
-
-# 🚀 Deployment
-
-## Frontend
-
-* Vercel
-
-## Backend
-
-* Render
-
-## Database
-
-* MongoDB Atlas
-
-## Image Storage
-
-* Cloudinary
-
----
-
 # 🔐 Authentication Flow
 
-1. User registers.
-2. Password is hashed using bcrypt.
-3. User logs in.
-4. JWT tokens are generated.
-5. Authentication cookies are sent to the client.
-6. Protected routes verify the user before granting access.
+1. User registers an account.
+2. Password is encrypted using bcrypt.
+3. User data is stored in MongoDB Atlas.
+4. JWT access and refresh tokens are generated.
+5. Authentication cookies are sent securely.
+6. Protected routes verify user identity.
 
 ---
 
-# ♟️ Real-Time Gameplay
+# ♟️ Real-Time Communication
 
-Socket.IO powers the multiplayer experience by handling:
+Socket.IO handles:
 
-* Room creation
-* Room joining
-* Player connections
-* Move synchronization
-* Turn updates
-* Game state synchronization
-* Player disconnection handling
+- Room creation
+- Player joining
+- Real-time connections
+- Chess moves
+- Turn updates
+- Board synchronization
+- Disconnect events
+
+Chess.js validates:
+
+- Legal moves
+- Game rules
+- Board state
 
 ---
 
-# 📤 Image Upload
+# 🖼️ Image Upload System
 
-Profile pictures are uploaded using:
+Profile uploads use:
 
-* Multer
-* Cloudinary
-* multer-storage-cloudinary
+- Multer
+- Cloudinary
+- multer-storage-cloudinary
 
-Images are stored on Cloudinary while their URLs are saved in MongoDB.
+Workflow:
+
+```
+User Upload
+     |
+   Multer
+     |
+ Cloudinary
+     |
+Image URL stored in MongoDB
+```
 
 ---
 
@@ -224,16 +243,50 @@ Images are stored on Cloudinary while their URLs are saved in MongoDB.
 
 MongoDB Atlas stores:
 
-* User accounts
-* Authentication details
-* Profile image URLs
-* Leaderboard information
+- User accounts
+- Authentication information
+- Profile image URLs
+- Leaderboard data
+- Player statistics
 
-Mongoose is used for schema creation, validation, and database operations.
+Mongoose provides:
+
+- Schema modelling
+- Validation
+- CRUD operations
 
 ---
 
-# 🌍 Environment Variables
+# 🌍 Production Deployment
+
+The application is fully deployed and publicly accessible.
+
+## Frontend
+
+- Hosted on **Vercel**
+- React + Vite production build
+- Environment variable configuration
+- Connected with backend API
+
+## Backend
+
+- Hosted on **Render**
+- Express production server
+- Socket.IO server deployment
+- CORS configuration
+- Environment variable management
+
+## Database
+
+- Hosted on **MongoDB Atlas**
+
+## Image Storage
+
+- Powered by **Cloudinary**
+
+---
+
+# ⚙️ Environment Variables
 
 ## Backend
 
@@ -263,35 +316,71 @@ VITE_API_URL=
 
 ---
 
-# 🧪 Testing Checklist
+# 🚀 Installation
 
-* ✅ User registration
-* ✅ User login
-* ✅ JWT authentication
-* ✅ Profile image upload
-* ✅ Create room
-* ✅ Join room
-* ✅ Play multiplayer chess
-* ✅ Live board synchronization
-* ✅ Leaderboard
-* ✅ MongoDB connection
-* ✅ Cloudinary uploads
-* ✅ Production deployment
+## Clone Repository
+
+```bash
+git clone https://github.com/Varshith-kummarikunta/Chess-Game.git
+
+cd Chess-Game
+```
 
 ---
 
-# 📖 Future Improvements
+## Backend Setup
 
-* Add spectator mode
-* Add game history
-* Add friend system
-* Add chat during matches
-* Add player matchmaking
-* Add game timers
-* Add draw and resignation options
-* Improve mobile responsiveness
-* Add email verification
-* Add password reset functionality
+```bash
+cd backend
+
+npm install
+
+npm run dev
+```
+
+---
+
+## Frontend Setup
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+---
+
+# 🧪 Testing Checklist
+
+✅ User registration  
+✅ User login  
+✅ JWT authentication  
+✅ Profile image upload  
+✅ Create game room  
+✅ Join game room  
+✅ Multiplayer chess gameplay  
+✅ Real-time synchronization  
+✅ Leaderboard  
+✅ MongoDB connection  
+✅ Cloudinary uploads  
+✅ Production deployment  
+
+---
+
+# 🔮 Future Improvements
+
+- Spectator mode
+- Match history
+- Friend system
+- In-game chat
+- Matchmaking
+- Chess timer
+- Draw and resignation options
+- Email verification
+- Password reset
+- Elo rating system
 
 ---
 
@@ -299,12 +388,18 @@ VITE_API_URL=
 
 **Varshith Kummarikunta**
 
-GitHub: https://github.com/Varshith-kummarikunta
+GitHub:  
+https://github.com/Varshith-kummarikunta
+
+LinkedIn:  
+https://linkedin.com/in/varshith-kummarikunta
 
 ---
 
-# ⭐ Support
+# 📄 License
 
-If you found this project useful, consider giving it a ⭐ on GitHub.
+This project is licensed under the MIT License.
 
-It helps others discover the project and supports future improvements.
+---
+
+⭐ If you like this project, consider giving it a star on GitHub.
